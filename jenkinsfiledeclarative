@@ -1,0 +1,49 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'maven3.6.3'
+    }
+
+    triggers {
+        pollSCM('* * * * *')
+    }
+
+    stages {
+        stage('CheckoutCode') {
+            steps {
+                git branch: 'dev', 
+                    credentialsId: 'a4928fda-7cd4-431a-bfa6-b59228140fea', 
+                    url: 'https://github.com/swamy-app-st/maven-web-application.git'
+            }
+        }
+
+        stage('Build') {
+            steps {     
+                sh "mvn clean package"
+            }
+        }
+
+        stage('ExecuteSonarQubeReport') {
+            steps {     
+                sh "mvn sonar:sonar"
+            }
+        }
+
+        stage('UploadArtifactIntoNexus') {
+            steps {     
+                sh "mvn deploy"
+            }
+        }
+
+        stage('DeployToTomcat') {
+            steps {
+                sshagent(['f0ea7212-8ebc-425e-94d5-19555de3cc6c']) {
+                    sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ubuntu@3.111.51.254:/opt/apache-tomcat-9.0.98/webapps/"
+                }
+            }
+        }
+    }
+
+    
+}
