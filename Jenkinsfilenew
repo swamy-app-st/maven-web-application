@@ -1,6 +1,7 @@
 node
 {
 def mavenHome = tool name: "maven3.6.3"
+//this is single line comment
 stage('checkout')
 {
 git branch: 'dev', credentialsId: 'a4928fda-7cd4-431a-bfa6-b59228140fea', url: 'https://github.com/swamy-app-st/maven-web-application.git'
